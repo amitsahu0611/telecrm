@@ -9,6 +9,8 @@ const {dbConnection} = require("./connection/db_connection");
 const userRouter = require("./routes/users.route");
 const leadRouter = require("./routes/lead.route");
 const workspaceRouter = require("./routes/workspace.route");
+const inhouseRouter = require("./routes/inhouseDivision.routes");
+const categoryRouter = require("./routes/serviceCategory.routes");
 
 const app = express();
 
@@ -34,6 +36,8 @@ app.use(express.urlencoded({limit: "10mb", extended: true}));
 app.use("/api/user", userRouter);
 app.use("/api/lead", leadRouter);
 app.use("/api/workspace", workspaceRouter);
+app.use("/api/inhouseDivision", inhouseRouter);
+app.use("/api/serviceCategory", categoryRouter);
 
 app.listen(PORT, () => {
   dbConnection();

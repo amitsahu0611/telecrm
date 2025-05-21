@@ -14,7 +14,9 @@ const createWorkspace = async (req, res) => {
     }
 
     // Check if workspace already exists
-    const existing = await Workspace.findOne({where: {workspace_name}});
+    const existing = await Workspace.findOne({
+      where: {workspace_name, is_deleted: false},
+    });
     if (existing) {
       return res.status(400).json({message: "Workspace name already exists."});
     }

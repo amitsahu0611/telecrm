@@ -98,7 +98,34 @@ const getAllLeadByWorkspaceId = async (req, res) => {
 
 const addAttachment = async (req, res) => {
   try {
-    const {user_id, workspace_id, type, content, original_name} = req.body;
+    const {
+      user_id,
+      workspace_id,
+      type: bodyType,
+      content: bodyContent,
+    } = req.body;
+
+    let type = bodyType;
+    let content = bodyContent;
+    let original_name = null;
+
+    if (req.file) {
+      // If a file is uploaded, set type and content accordingly
+      const filePath = `/uploads/${req.file.filename}`;
+      content = filePath;
+      original_name = req.file.originalname;
+
+      // Set type to 'image' or 'file' based on MIME
+      if (req.file.mimetype.startsWith("image/")) {
+        type = "image";
+      } else {
+        type = "file";
+      }
+    }
+
+    if (!type || !content) {
+      return res.status(400).json({message: "Type and content are required."});
+    }
 
     const newAttachment = await Attachment.create({
       user_id,
@@ -112,9 +139,32 @@ const addAttachment = async (req, res) => {
       .status(201)
       .json(createSuccess("Attachment added successfully", newAttachment));
   } catch (err) {
+    console.error("Attachment upload error:", err);
     res
       .status(500)
       .json({success: false, message: "Error adding attachment", err});
+  }
+};
+
+const getAttachmentByUserId = async (req, res) => {
+  try {
+    const {user_id} = req.params;
+
+    const attachments = await Attachment.findAll({
+      where: {user_id},
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (!attachments) {
+      return res.status(404).json({message: "Attachments not found"});
+    }
+
+    return res.json(
+      createSuccess("Attachments retrieved successfully", attachments)
+    );
+  } catch (error) {
+    console.error("Error retrieving attachments:", error);
+    return res.status(500).json({message: "Internal server error"});
   }
 };
 
@@ -124,4 +174,5 @@ module.exports = {
   bulkcreateFromCsv,
   getAllLeadByWorkspaceId,
   addAttachment,
+  getAttachmentByUserId,
 };

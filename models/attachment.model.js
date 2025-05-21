@@ -44,3 +44,14 @@ const Attachment = sequelize.define(
 );
 
 module.exports = Attachment;
+
+// (async () => {
+//   try {
+//     await Attachment.sync({alter: true}); // Use alter to update table if it already exists
+//     console.log("Attachment table synced successfully.");
+//   } catch (error) {
+//     console.error("Error syncing Users table:", error);
+//   } finally {
+//     await sequelize.close();
+//   }
+// })();
