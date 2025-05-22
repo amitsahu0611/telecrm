@@ -76,7 +76,7 @@ const getAllWorkspaces = async (req, res) => {
 const updateWorkspace = async (req, res) => {
   try {
     const {id} = req.params;
-    const {workspace_name, description, is_active} = req.body;
+    const {workspace_name, description} = req.body;
 
     const workspace = await Workspace.findByPk(id);
     if (!workspace) {
@@ -87,7 +87,6 @@ const updateWorkspace = async (req, res) => {
       workspace_name,
       description,
       is_active,
-      is_deleted: !is_active,
     });
 
     res.json(createSuccess("Workspace updated successfully", workspace));

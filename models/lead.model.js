@@ -2,6 +2,8 @@
 
 const {DataTypes} = require("sequelize");
 const sequelize = require("../connection/db_connection");
+const Campaign = require("./Campaign.model");
+const LeadCampaignMap = require("./LeadCampaignMap.model");
 
 const Lead = sequelize.define(
   "Lead",
@@ -30,6 +32,11 @@ const Lead = sequelize.define(
     inhouse_division: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    sheet_name: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      comment: "Name of the CSV file or import batch",
     },
     service_categories: {
       type: DataTypes.STRING,

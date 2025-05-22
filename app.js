@@ -11,6 +11,8 @@ const leadRouter = require("./routes/lead.route");
 const workspaceRouter = require("./routes/workspace.route");
 const inhouseRouter = require("./routes/inhouseDivision.routes");
 const categoryRouter = require("./routes/serviceCategory.routes");
+const associateModels = require("./models/associateModels");
+const campaignRouter = require("./routes/campaign.route");
 
 const app = express();
 
@@ -38,8 +40,10 @@ app.use("/api/lead", leadRouter);
 app.use("/api/workspace", workspaceRouter);
 app.use("/api/inhouseDivision", inhouseRouter);
 app.use("/api/serviceCategory", categoryRouter);
+app.use("/api/campaign", campaignRouter);
 
 app.listen(PORT, () => {
   dbConnection();
+  associateModels();
   console.log(colors.rainbow(`Server running on PORT ${PORT}...`));
 });
