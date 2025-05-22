@@ -22,7 +22,6 @@ const Workspace = sequelize.define(
     workspace_name: {
       type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
     },
     description: {
       type: DataTypes.TEXT,

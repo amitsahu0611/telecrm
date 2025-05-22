@@ -17,10 +17,14 @@ const createWorkspace = async (req, res) => {
     const existing = await Workspace.findOne({
       where: {workspace_name, is_deleted: false},
     });
+
+    console.log("Existing workspace:", existing);
+
     if (existing) {
       return res.status(400).json({message: "Workspace name already exists."});
     }
 
+console.log("Creating new workspace with name:", workspace_name);
     // Create workspace
     const newWorkspace = await Workspace.create({
       workspace_name,
