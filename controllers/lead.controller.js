@@ -5,7 +5,7 @@ const Lead = require("../models/lead.model");
 const fs = require("fs");
 const csv = require("csv-parser");
 const Attachment = require("../models/attachment.model");
-const {create} = require("domain");
+const {Sequelize, Op} = require("sequelize");
 
 const createLead = async (req, res) => {
   try {
@@ -23,6 +23,7 @@ const bulkcreateFromCsv = async (req, res) => {
     const leads = [];
     const filePath = req.file.path;
     const {workspace_id} = req.body;
+    const fileName = req.file.filename.split(".")[0];
 
     fs.createReadStream(filePath)
       .pipe(csv())
@@ -33,6 +34,7 @@ const bulkcreateFromCsv = async (req, res) => {
           workspace_id,
           phone: row.phone || null,
           source: row.source || null,
+          sheet_name: fileName || "",
           inhouse_division: row.inhouse_division || null,
           service_categories: row.service_categories || null,
           requirements: row.requirements || null,
@@ -168,6 +170,53 @@ const getAttachmentByUserId = async (req, res) => {
   }
 };
 
+const getallImportedLeads = async (req, res) => {
+  try {
+    const {workspace_id} = req.params;
+
+    // Step 1: Get distinct sheet names
+    const distinctSheets = await Lead.findAll({
+      attributes: [
+        "sheet_name",
+        [Sequelize.fn("MIN", Sequelize.col("createdAt")), "createdAt"],
+      ],
+      where: {
+        sheet_name: {
+          [Op.ne]: null,
+        },
+        workspace_id,
+      },
+      group: ["sheet_name"],
+      raw: true,
+    });
+
+    // Step 2: For each sheet, fetch all leads
+    const result = await Promise.all(
+      distinctSheets.map(async (sheet) => {
+        const leads = await Lead.findAll({
+          where: {
+            sheet_name: sheet.sheet_name,
+            workspace_id,
+          },
+          order: [["createdAt", "DESC"]],
+        });
+
+        return {
+          sheetName: sheet.sheet_name,
+          createdAt: sheet.createdAt,
+          totalLeads: leads.length,
+          allLeads: leads,
+        };
+      })
+    );
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Error retrieving imported leads:", error);
+    return res.status(500).json({message: "Internal server error"});
+  }
+};
+
 module.exports = {
   createLead,
   getLeadById,
@@ -175,4 +224,5 @@ module.exports = {
   getAllLeadByWorkspaceId,
   addAttachment,
   getAttachmentByUserId,
+  getallImportedLeads,
 };
